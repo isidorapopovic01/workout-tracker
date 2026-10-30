@@ -1,0 +1,377 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Workout Tracker</title>
+
+<style>
+:root {
+  --bg: #f5f4f0;
+  --card: #ffffff;
+  --text: #292c29;
+  --muted: #777c75;
+  --accent: #657b68;
+  --line: #e7e8e2;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 25px 16px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  max-width: 850px;
+  margin: auto;
+}
+
+h1 { margin-bottom: 5px; }
+
+.subtitle {
+  color: var(--muted);
+  margin-top: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin: 25px 0 15px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 13px 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.tabs button.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.progress-card, .exercise {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 17px;
+  margin-bottom: 12px;
+}
+
+.progress-bar {
+  height: 8px;
+  background: var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width .2s;
+}
+
+.exercise {
+  display: grid;
+  grid-template-columns: 28px 1fr 85px 85px;
+  gap: 12px;
+  align-items: center;
+}
+
+.exercise.done {
+  opacity: .65;
+}
+
+.exercise.done .exercise-name {
+  text-decoration: line-through;
+}
+
+.exercise input[type="checkbox"] {
+  width: 19px;
+  height: 19px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.exercise-name {
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.exercise-meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.field input {
+  width: 100%;
+  padding: 10px 6px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-size: 15px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  gap: 12px;
+}
+
+.actions button {
+  border: 1px solid var(--line);
+  background: white;
+  padding: 11px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media(max-width: 520px) {
+  body { padding: 18px 10px; }
+
+  .exercise {
+    grid-template-columns: 25px 1fr 65px 65px;
+    gap: 7px;
+    padding: 13px 9px;
+  }
+
+  .exercise-name { font-size: 13px; }
+  .field input { font-size: 13px; }
+  .tabs button { font-size: 12px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>My Workout Tracker</h1>
+  <p class="subtitle">Three-day full-body programme</p>
+
+  <div class="tabs">
+    <button class="active" onclick="showDay(0)">Day 1</button>
+    <button onclick="showDay(1)">Day 2</button>
+    <button onclick="showDay(2)">Day 3</button>
+  </div>
+
+  <div class="progress-card">
+    <strong id="dayTitle">Day 1 – RDL Focus</strong>
+    <p id="progressText">0 of 6 exercises completed</p>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div id="exerciseList"></div>
+
+  <div class="actions">
+    <span class="note">Your entries save automatically.</span>
+    <button onclick="resetChecks()">Reset checkmarks</button>
+  </div>
+
+</div>
+
+<script>
+const workouts = [
+  {
+    title: "Day 1 – RDL Focus",
+    exercises: [
+      ["Barbell Romanian deadlift", "3 × 8–10"],
+      ["Seated chest press machine", "3 × 10–12"],
+      ["Bulgarian split squat", "3 × 8–10 / leg"],
+      ["Seated cable row", "3 × 10–12"],
+      ["Seated leg curl", "3 × 10–12"],
+      ["Hanging knee raises", "3 × 10–15"]
+    ]
+  },
+  {
+    title: "Day 2 – Hip Thrust Focus",
+    exercises: [
+      ["Barbell hip thrust", "3 × 8–12"],
+      ["Incline dumbbell chest press", "3 × 10–12"],
+      ["Seated leg extension", "3 × 10–12"],
+      ["Lat pulldown", "3 × 10–12"],
+      ["Seated hip abductor machine", "3 × 12–15"],
+      ["Dumbbell lateral raises", "2 × 12–15"],
+      ["Side bench curls (obliques)", "3 × 12–15 / side"]
+    ]
+  },
+  {
+    title: "Day 3 – Squat Focus",
+    exercises: [
+      ["Barbell squat", "3 × 8–10"],
+      ["Chest-supported row", "3 × 10–12"],
+      ["Hip adductor machine", "3 × 12–15"],
+      ["Machine chest press", "3 × 10–12"],
+      ["Glute-focused hip extension", "2 × 12–15"],
+      ["Weighted bench sit-ups", "3 × 10–15"]
+    ]
+  }
+];
+
+let currentDay = 0;
+let saved = JSON.parse(
+  localStorage.getItem("workoutData") || "{}"
+);
+
+function save() {
+  localStorage.setItem(
+    "workoutData",
+    JSON.stringify(saved)
+  );
+}
+
+function getEntry(day, index) {
+  if (!saved[day]) saved[day] = {};
+  if (!saved[day][index]) {
+    saved[day][index] = {
+      done: false,
+      weight: "",
+      reps: ""
+    };
+  }
+  return saved[day][index];
+}
+
+function showDay(day) {
+  currentDay = day;
+
+  document.querySelectorAll(".tabs button")
+    .forEach((button, i) => {
+      button.classList.toggle("active", i === day);
+    });
+
+  document.getElementById("dayTitle").textContent =
+    workouts[day].title;
+
+  render();
+}
+
+function render() {
+  const list = document.getElementById("exerciseList");
+  list.innerHTML = "";
+
+  workouts[currentDay].exercises.forEach(
+    (exercise, index) => {
+      const entry = getEntry(currentDay, index);
+
+      const card = document.createElement("div");
+      card.className = "exercise" +
+        (entry.done ? " done" : "");
+
+      card.innerHTML = `
+        <input type="checkbox"
+          ${entry.done ? "checked" : ""}
+          aria-label="Mark exercise completed">
+
+        <div>
+          <div class="exercise-name">
+            ${exercise[0]}
+          </div>
+          <div class="exercise-meta">
+            ${exercise[1]}
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Weight (kg)</label>
+          <input type="number" min="0" step="0.5"
+            placeholder="0"
+            value="${entry.weight}"
+            aria-label="Weight in kilograms">
+        </div>
+
+        <div class="field">
+          <label>Actual reps</label>
+          <input type="number" min="0" step="1"
+            placeholder="0"
+            value="${entry.reps}"
+            aria-label="Actual reps">
+        </div>
+      `;
+
+      const checkbox = card.querySelector(
+        'input[type="checkbox"]'
+      );
+
+      const fields = card.querySelectorAll(
+        'input[type="number"]'
+      );
+
+      checkbox.addEventListener("change", e => {
+        entry.done = e.target.checked;
+        save();
+        render();
+      });
+
+      fields[0].addEventListener("input", e => {
+        entry.weight = e.target.value;
+        save();
+      });
+
+      fields[1].addEventListener("input", e => {
+        entry.reps = e.target.value;
+        save();
+      });
+
+      list.appendChild(card);
+    }
+  );
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = workouts[currentDay].exercises.length;
+
+  const completed = workouts[currentDay].exercises
+    .filter((_, i) => getEntry(currentDay, i).done)
+    .length;
+
+  document.getElementById("progressText").textContent =
+    `${completed} of ${total} exercises completed`;
+
+  document.getElementById("progressFill").style.width =
+    `${(completed / total) * 100}%`;
+}
+
+function resetChecks() {
+  if (!confirm("Uncheck all exercises for this day?")) return;
+
+  workouts[currentDay].exercises.forEach((_, i) => {
+    getEntry(currentDay, i).done = false;
+  });
+
+  save();
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
