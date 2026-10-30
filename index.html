@@ -7,16 +7,19 @@
 <title>My Workout Tracker</title>
 
 <style>
+
 :root {
-  --bg: #f5f4f0;
-  --card: #ffffff;
-  --text: #292c29;
-  --muted: #777c75;
-  --accent: #657b68;
-  --line: #e7e8e2;
+  --bg: #17191d;
+  --card: #22252b;
+  --text: #ecece8;
+  --muted: #a0a4ad;
+  --accent: #a3b89b;
+  --line: #383c44;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -49,19 +52,22 @@ h1 { margin-bottom: 5px; }
   padding: 13px 8px;
   border: 1px solid var(--line);
   border-radius: 9px;
-  background: white;
+  background: var(--card);
+  color: var(--text);
   cursor: pointer;
   font-weight: bold;
 }
 
 .tabs button.active {
   background: var(--accent);
-  color: white;
+  color: #17191d;
   border-color: var(--accent);
 }
 
-.progress-card, .exercise {
+.progress-card,
+.exercise {
   background: var(--card);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 17px;
   margin-bottom: 12px;
@@ -90,7 +96,7 @@ h1 { margin-bottom: 5px; }
 }
 
 .exercise.done {
-  opacity: .65;
+  opacity: .55;
 }
 
 .exercise.done .exercise-name {
@@ -127,7 +133,14 @@ h1 { margin-bottom: 5px; }
   padding: 10px 6px;
   border: 1px solid var(--line);
   border-radius: 7px;
+  background: #191c21;
+  color: var(--text);
   font-size: 15px;
+}
+
+.field input:focus {
+  outline: 2px solid var(--accent);
+  border-color: var(--accent);
 }
 
 .actions {
@@ -140,7 +153,8 @@ h1 { margin-bottom: 5px; }
 
 .actions button {
   border: 1px solid var(--line);
-  background: white;
+  background: var(--card);
+  color: var(--text);
   padding: 11px 15px;
   border-radius: 8px;
   cursor: pointer;
